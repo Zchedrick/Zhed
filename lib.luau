@@ -27,6 +27,7 @@ function LibraryUI:CreateWindow(config)
     local windowName = config.Name or "UI Library"
     local windowWidth = config.Width or 600
     local windowHeight = config.Height or 450
+    local titleIconId = config.TitleIcon or nil
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "LibraryGui"
@@ -71,10 +72,20 @@ function LibraryUI:CreateWindow(config)
     titleFix.ZIndex = 0
     titleFix.Parent = TitleBar
 
+    local TitleIcon = Instance.new("ImageLabel")
+    TitleIcon.Name = "TitleIcon"
+    TitleIcon.Size = UDim2.new(0, 28, 0, 28)
+    TitleIcon.Position = UDim2.new(0, 10, 0.5, -14)
+    TitleIcon.BackgroundTransparency = 1
+    TitleIcon.Image = titleIconId or ""
+    TitleIcon.Parent = TitleBar
+    local iconCorner = Instance.new("UICorner"); iconCorner.CornerRadius = UDim.new(1, 0); iconCorner.Parent = TitleIcon
+    TitleIcon.ImageColor3 = THEME.Text
+
     local TitleText = Instance.new("TextLabel")
     TitleText.BackgroundTransparency = 1
-    TitleText.Position = UDim2.new(0, 15, 0, 0)
-    TitleText.Size = UDim2.new(1, -30, 1, 0)
+    TitleText.Position = UDim2.new(0, 48, 0, 0)
+    TitleText.Size = UDim2.new(1, -56, 1, 0)
     TitleText.Font = Enum.Font.GothamBold
     TitleText.Text = windowName
     TitleText.TextColor3 = THEME.Text
@@ -185,7 +196,6 @@ function LibraryUI:CreateWindow(config)
 
     ShowHideButton.MouseButton1Click:Connect(function()
         isWindowVisible = not isWindowVisible
-
         if isWindowVisible then
             MainWindow.Visible = true
             TweenService:Create(MainWindow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -402,12 +412,7 @@ function LibraryUI:CreateWindow(config)
             TweenService:Create(n, TweenInfo.new(0.2), { Position = UDim2.new(0, 0, 0, (i-1) * 72) }):Play()
         end
         notif.Position = UDim2.new(0, 0, 0, (#notificationStack-1) * 72)
-        notif.Transparency = 1
-        notif.BackgroundTransparency = 1
         TweenService:Create(notif, TweenInfo.new(0.18), { BackgroundTransparency = 0 }):Play()
-        TweenService:Create(notif, TweenInfo.new(0.18), { Position = UDim2.new(0, 0, 0, (#notificationStack-1) * 72) }):Play()
-        local t1 = TweenService:Create(notif, TweenInfo.new(0.18), { BackgroundTransparency = 0 })
-        t1:Play()
         local closed = false
         local function remove()
             if closed then return end
@@ -441,6 +446,7 @@ function LibraryUI:CreateWindow(config)
         TabButton.BackgroundTransparency = 1
         TabButton.ZIndex = 2
         TabButton.Parent = TabBar
+
         local tabIcon = nil
         local tabLabelPosition = 0
         if iconId then
@@ -451,10 +457,12 @@ function LibraryUI:CreateWindow(config)
             tabIcon.Image = iconId
             tabIcon.ImageColor3 = THEME.SubText
             tabIcon.Parent = TabButton
+            local tic = Instance.new("UICorner"); tic.CornerRadius = UDim.new(1,0); tic.Parent = tabIcon
             tabLabelPosition = 28
         else
             tabLabelPosition = 8
         end
+
         local tabLabel = Instance.new("TextLabel")
         tabLabel.BackgroundTransparency = 1
         tabLabel.Position = UDim2.new(0, tabLabelPosition, 0.5, 0)
@@ -466,6 +474,7 @@ function LibraryUI:CreateWindow(config)
         tabLabel.TextColor3 = THEME.SubText
         tabLabel.TextXAlignment = Enum.TextXAlignment.Left
         tabLabel.Parent = TabButton
+
         task.wait(0.01)
         local textBounds = tabLabel.TextBounds.X
         local tabWidth = 0
@@ -475,22 +484,27 @@ function LibraryUI:CreateWindow(config)
             tabWidth = textBounds + 30
         end
         TabButton.Size = UDim2.new(0, tabWidth, 0, 30)
+
         local tabClickArea = Instance.new("TextButton")
         tabClickArea.BackgroundTransparency = 1
         tabClickArea.Size = UDim2.new(1, 0, 1, 0)
         tabClickArea.Text = ""
         tabClickArea.Parent = TabButton
+
         local xPos = 10
         for i = 1, tabIndex - 1 do
             xPos = xPos + tabPositions[tabOrder[i]].width + 4
         end
+
         TabButton.Position = UDim2.new(0, xPos, 0, 5)
         tabButtons[tabName] = { button = TabButton, icon = tabIcon, label = tabLabel }
         tabPositions[tabName] = { x = xPos, width = tabWidth }
         table.insert(tabOrder, tabName)
+
         tabClickArea.MouseButton1Click:Connect(function()
             selectTab(tabName)
         end)
+
         tabClickArea.MouseEnter:Connect(function()
             if activeTab ~= tabName then
                 TweenService:Create(tabLabel, TweenInfo.new(0.2), {
@@ -503,6 +517,7 @@ function LibraryUI:CreateWindow(config)
                 end
             end
         end)
+
         tabClickArea.MouseLeave:Connect(function()
             if activeTab ~= tabName then
                 TweenService:Create(tabLabel, TweenInfo.new(0.2), {
@@ -778,6 +793,7 @@ function LibraryUI:CreateWindow(config)
             containerFrame.Size = UDim2.new(1, 0, 0, 40)
             containerFrame.BackgroundTransparency = 1
             containerFrame.ClipsDescendants = false
+
             local dropdownButton = Instance.new("Frame")
             dropdownButton.Name = "DropdownButton"
             dropdownButton.Parent = containerFrame
@@ -785,9 +801,11 @@ function LibraryUI:CreateWindow(config)
             dropdownButton.BackgroundColor3 = THEME.Panel
             dropdownButton.BorderSizePixel = 0
             dropdownButton.ZIndex = 10
+
             local dropdownCorner = Instance.new("UICorner")
             dropdownCorner.CornerRadius = UDim.new(0, 8)
             dropdownCorner.Parent = dropdownButton
+
             local label = Instance.new("TextLabel")
             label.Parent = dropdownButton
             label.BackgroundTransparency = 1
@@ -798,6 +816,7 @@ function LibraryUI:CreateWindow(config)
             label.TextColor3 = THEME.Text
             label.TextSize = 13
             label.TextXAlignment = Enum.TextXAlignment.Left
+
             local valueLabel = Instance.new("TextLabel")
             valueLabel.Parent = dropdownButton
             valueLabel.BackgroundTransparency = 1
@@ -809,6 +828,7 @@ function LibraryUI:CreateWindow(config)
             valueLabel.TextColor3 = THEME.Accent
             valueLabel.TextSize = 12
             valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+
             local dropdownArrow = Instance.new("TextLabel")
             dropdownArrow.Parent = dropdownButton
             dropdownArrow.BackgroundTransparency = 1
@@ -837,7 +857,7 @@ function LibraryUI:CreateWindow(config)
             local menuStroke = Instance.new("UIStroke")
             menuStroke.Color = THEME.Accent
             menuStroke.Thickness = 1
-            menuStroke.Transparency = 0.3
+            menuStroke.Transparency = 1
             menuStroke.Parent = dropdownMenu
 
             local menuLayout = Instance.new("UIListLayout")
@@ -907,7 +927,9 @@ function LibraryUI:CreateWindow(config)
                         t1:Play(); t2:Play()
                         t1.Completed:Connect(function()
                             dropdownMenu.Visible = false
-                            menuStroke.Transparency = 0.3
+                            menuStroke.Transparency = 1
+                            for _, v in ipairs(menuItems) do if v and v.Parent then v:Destroy() end end
+                            menuItems = {}
                         end)
                         TweenService:Create(dropdownArrow, TweenInfo.new(0.18), { Rotation = 0 }):Play()
                         if onChange then onChange(option) end
@@ -916,11 +938,11 @@ function LibraryUI:CreateWindow(config)
                 end
             end
 
-            rebuildMenu()
             dropdownMenu.Visible = false
 
             local outsideConn
             local function enableOutsideClose()
+                if outsideConn then outsideConn:Disconnect() outsideConn = nil end
                 outsideConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
                     if gameProcessed then return end
                     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -939,7 +961,9 @@ function LibraryUI:CreateWindow(config)
                                 t1:Play(); t2:Play()
                                 t1.Completed:Connect(function()
                                     dropdownMenu.Visible = false
-                                    menuStroke.Transparency = 0.3
+                                    menuStroke.Transparency = 1
+                                    for _, v in ipairs(menuItems) do if v and v.Parent then v:Destroy() end end
+                                    menuItems = {}
                                 end)
                                 TweenService:Create(dropdownArrow, TweenInfo.new(0.18), { Rotation = 0 }):Play()
                                 if outsideConn then outsideConn:Disconnect() outsideConn = nil end
@@ -958,11 +982,12 @@ function LibraryUI:CreateWindow(config)
 
             buttonClickArea.MouseButton1Click:Connect(function()
                 isOpen = not isOpen
-                local menuHeight = computeMenuHeight()
                 if isOpen then
+                    rebuildMenu()
+                    local menuHeight = computeMenuHeight()
                     dropdownMenu.Visible = true
-                    dropdownMenu.Size = UDim2.new(1, 0, 0, 0)
                     menuStroke.Transparency = 0.3
+                    dropdownMenu.Size = UDim2.new(1, 0, 0, 0)
                     local t1 = TweenService:Create(dropdownMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                         Size = UDim2.new(1, 0, 0, menuHeight)
                     })
@@ -982,7 +1007,9 @@ function LibraryUI:CreateWindow(config)
                     t1:Play(); t2:Play()
                     t1.Completed:Connect(function()
                         dropdownMenu.Visible = false
-                        menuStroke.Transparency = 0.3
+                        menuStroke.Transparency = 1
+                        for _, v in ipairs(menuItems) do if v and v.Parent then v:Destroy() end end
+                        menuItems = {}
                     end)
                     TweenService:Create(dropdownArrow, TweenInfo.new(0.18), { Rotation = 0 }):Play()
                     if outsideConn then outsideConn:Disconnect() outsideConn = nil end
@@ -1000,7 +1027,6 @@ function LibraryUI:CreateWindow(config)
             end
             function dropdownApi:UpdateOptions(newOptions)
                 options = newOptions or options
-                rebuildMenu()
             end
             return dropdownApi
         end
