@@ -22,6 +22,140 @@ _G.Accent = THEME.Accent
 
 local LibraryUI = {}
 
+-- Notification System
+local notificationContainer = nil
+
+local function createNotificationContainer()
+    if notificationContainer then return end
+    
+    local notifGui = Instance.new("ScreenGui")
+    notifGui.Name = "NotificationGui"
+    notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    notifGui.ResetOnSpawn = false
+    notifGui.Parent = game:GetService("CoreGui")
+    
+    notificationContainer = Instance.new("Frame")
+    notificationContainer.Name = "NotificationContainer"
+    notificationContainer.Size = UDim2.new(0, 350, 1, 0)
+    notificationContainer.Position = UDim2.new(1, -370, 0, 20)
+    notificationContainer.BackgroundTransparency = 1
+    notificationContainer.Parent = notifGui
+    
+    local layout = Instance.new("UIListLayout")
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 10)
+    layout.VerticalAlignment = Enum.VerticalAlignment.Top
+    layout.Parent = notificationContainer
+end
+
+function LibraryUI:ShowNotification(config)
+    createNotificationContainer()
+    
+    config = config or {}
+    local title = config.Title or "Notification"
+    local description = config.Description or ""
+    local iconId = config.IconId or "rbxassetid://7072706977"
+    local duration = config.Duration or 5
+    local bgColor = config.Color or THEME.Panel
+    
+    local notif = Instance.new("Frame")
+    notif.Name = "Notification"
+    notif.Size = UDim2.new(1, 0, 0, 80)
+    notif.BackgroundColor3 = bgColor
+    notif.BorderSizePixel = 0
+    notif.Parent = notificationContainer
+    
+    local notifCorner = Instance.new("UICorner")
+    notifCorner.CornerRadius = UDim.new(0, 10)
+    notifCorner.Parent = notif
+    
+    local notifStroke = Instance.new("UIStroke")
+    notifStroke.Color = THEME.Accent
+    notifStroke.Thickness = 1.5
+    notifStroke.Transparency = 0.3
+    notifStroke.Parent = notif
+    
+    -- Icon
+    local icon = Instance.new("ImageLabel")
+    icon.Name = "Icon"
+    icon.Size = UDim2.new(0, 50, 0, 50)
+    icon.Position = UDim2.new(0, 10, 0.5, -25)
+    icon.AnchorPoint = Vector2.new(0, 0.5)
+    icon.BackgroundColor3 = THEME.Dark
+    icon.BorderSizePixel = 0
+    icon.Image = iconId
+    icon.ImageColor3 = THEME.Text
+    icon.ScaleType = Enum.ScaleType.Fit
+    icon.Parent = notif
+    
+    local iconCorner = Instance.new("UICorner")
+    iconCorner.CornerRadius = UDim.new(0, 6)
+    iconCorner.Parent = icon
+    
+    -- Content Frame
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Name = "Content"
+    contentFrame.Size = UDim2.new(1, -80, 1, 0)
+    contentFrame.Position = UDim2.new(0, 65, 0, 0)
+    contentFrame.BackgroundTransparency = 1
+    contentFrame.Parent = notif
+    
+    -- Title
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "Title"
+    titleLabel.Size = UDim2.new(1, -10, 0, 20)
+    titleLabel.Position = UDim2.new(0, 0, 0, 5)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Text = title
+    titleLabel.TextColor3 = THEME.Text
+    titleLabel.TextSize = 13
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = contentFrame
+    
+    -- Description
+    local descLabel = Instance.new("TextLabel")
+    descLabel.Name = "Description"
+    descLabel.Size = UDim2.new(1, -10, 0, 35)
+    descLabel.Position = UDim2.new(0, 0, 0, 28)
+    descLabel.BackgroundTransparency = 1
+    descLabel.Font = Enum.Font.Gotham
+    descLabel.Text = description
+    descLabel.TextColor3 = THEME.SubText
+    descLabel.TextSize = 11
+    descLabel.TextXAlignment = Enum.TextXAlignment.Left
+    descLabel.TextYAlignment = Enum.TextYAlignment.Top
+    descLabel.TextWrapped = true
+    descLabel.Parent = contentFrame
+    
+    -- Close Button
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Name = "CloseButton"
+    closeBtn.Size = UDim2.new(0, 20, 0, 20)
+    closeBtn.Position = UDim2.new(1, -25, 0, 5)
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.Text = "×"
+    closeBtn.TextColor3 = THEME.SubText
+    closeBtn.TextSize = 18
+    closeBtn.Parent = notif
+    
+    local function removeNotif()
+        TweenService:Create(notif, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            BackgroundTransparency = 1
+        }):Play()
+        game:GetService("Debris"):AddItem(notif, 0.3)
+    end
+    
+    closeBtn.MouseButton1Click:Connect(removeNotif)
+    
+    if duration > 0 then
+        task.delay(duration, removeNotif)
+    end
+    
+    return notif
+end
+
 function LibraryUI:CreateWindow(config)
     config = config or {}
     local windowName = config.Name or "UI Library"
@@ -688,6 +822,7 @@ function LibraryUI:CreateWindow(config)
             containerFrame.Size = UDim2.new(1, 0, 0, 40)
             containerFrame.BackgroundTransparency = 1
             containerFrame.ClipsDescendants = false
+            containerFrame.ZIndex = 5
 
             local dropdownButton = Instance.new("Frame")
             dropdownButton.Name = "DropdownButton"
@@ -735,6 +870,7 @@ function LibraryUI:CreateWindow(config)
             dropdownArrow.TextColor3 = THEME.Accent
             dropdownArrow.TextSize = 12
 
+            -- Create menu parent (outside content area to avoid clipping)
             local dropdownMenu = Instance.new("Frame")
             dropdownMenu.Name = "DropdownMenu"
             dropdownMenu.Parent = ScreenGui
@@ -744,6 +880,7 @@ function LibraryUI:CreateWindow(config)
             dropdownMenu.BorderSizePixel = 0
             dropdownMenu.ClipsDescendants = true
             dropdownMenu.ZIndex = 50
+            dropdownMenu.Visible = false
 
             local menuCorner = Instance.new("UICorner")
             menuCorner.CornerRadius = UDim.new(0, 8)
@@ -818,6 +955,7 @@ function LibraryUI:CreateWindow(config)
                     TweenService:Create(dropdownArrow, TweenInfo.new(0.18), { Rotation = 0 }):Play()
 
                     isOpen = false
+                    dropdownMenu.Visible = false
                     if onChange then onChange(optionText) end
                 end)
             end
@@ -847,6 +985,7 @@ function LibraryUI:CreateWindow(config)
                                 }):Play()
                                 TweenService:Create(dropdownArrow, TweenInfo.new(0.18), { Rotation = 0 }):Play()
                                 isOpen = false
+                                dropdownMenu.Visible = false
                                 if outsideConn then outsideConn:Disconnect() outsideConn = nil end
                             end
                         end
@@ -869,6 +1008,7 @@ function LibraryUI:CreateWindow(config)
                 local menuHeight = computeMenuHeight()
 
                 if isOpen then
+                    dropdownMenu.Visible = true
                     dropdownMenu.Size = UDim2.new(0, dropdownButton.AbsoluteSize.X, 0, 0)
                     updateMenuPositionAndWidth()
                     TweenService:Create(dropdownMenu, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
@@ -881,6 +1021,8 @@ function LibraryUI:CreateWindow(config)
                         Size = UDim2.new(0, dropdownButton.AbsoluteSize.X, 0, 0)
                     }):Play()
                     TweenService:Create(dropdownArrow, TweenInfo.new(0.18), { Rotation = 0 }):Play()
+                    task.wait(0.18)
+                    dropdownMenu.Visible = false
                     if outsideConn then outsideConn:Disconnect() outsideConn = nil end
                 end
             end)
